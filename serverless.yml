@@ -1,0 +1,18 @@
+org: moulout
+app: sls-framework-2-lambda
+service: sls-framework-2-lambda
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  cadastrarAlunos:
+    handler: index.cadastrarAlunos
+    events:
+      - s3:
+          bucket: alunos-csv-local
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .csv
