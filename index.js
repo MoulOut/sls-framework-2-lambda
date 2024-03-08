@@ -1,7 +1,11 @@
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require('@aws-sdk/client-s3');
 
-async function fazUploadNoBucket() {
-  const client = new S3Client({
+function createS3Client() {
+  return new S3Client({
     forcePathStyle: true,
     credentials: {
       accessKeyId: 'S3RVER',
@@ -9,6 +13,10 @@ async function fazUploadNoBucket() {
     },
     endpoint: 'http://localhost:4569',
   });
+}
+
+async function fazUploadNoBucket() {
+  const client = createS3Client();
 
   const comandoUpload = new PutObjectCommand({
     Bucket: 'alunos-csv-local',
@@ -36,6 +44,27 @@ module.exports.simulandoUploadCsv = async (event) => {
   }
 };
 
+async function obtemDadosDoCsv(bucket, key) {
+  const client = createS3Client();
+
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  });
+
+  const response = await client.send(command);
+  const csvData = response.Body.transformToString('utf-8');
+
+  return csvData;
+}
+
 module.exports.cadastrarAlunos = async (event) => {
-  console.log('Funcao lambda executada a partir do bucket s3');
+  const eventoS3 = event.Records[0].s3;
+
+  const bucketName = eventoS3.bucket.name;
+  const keyBucket = decodeURIComponent(eventoS3.object.key.replace(/\+/g, ' '));
+
+  const data = await obtemDadosDoCsv(bucketName, keyBucket);
+
+  console.log(data);
 };
