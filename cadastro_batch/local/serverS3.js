@@ -3,6 +3,8 @@ const {
   PutObjectCommand,
   GetObjectCommand,
 } = require('@aws-sdk/client-s3');
+const { readFile } = require('fs/promises');
+const { join } = require('path');
 
 function createS3Client() {
   return new S3Client({
@@ -18,31 +20,18 @@ function createS3Client() {
 async function fazUploadNoBucket() {
   const client = createS3Client();
 
+  const fileName = 'cadastrar_alunos.csv';
+  const filePath = join(__dirname, fileName);
+  const csvData = await readFile(filePath, 'utf-8');
+
   const comandoUpload = new PutObjectCommand({
     Bucket: 'alunos-csv-local',
-    Key: 'test.csv',
-    Body: Buffer.from('12345'),
+    Key: fileName,
+    Body: csvData,
   });
 
   await client.send(comandoUpload);
 }
-
-module.exports.simulandoUploadCsv = async (event) => {
-  try {
-    await fazUploadNoBucket();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Simulando upload de CSV' }),
-    };
-  } catch (error) {
-    return {
-      statusCode: error.statusCode || 500,
-      body: JSON.stringify(error),
-      headers: { 'Content-Type': 'application/json' },
-    };
-  }
-};
 
 async function obtemDadosDoCsv(bucket, key) {
   const client = createS3Client();
@@ -58,13 +47,7 @@ async function obtemDadosDoCsv(bucket, key) {
   return csvData;
 }
 
-module.exports.cadastrarAlunos = async (event) => {
-  const eventoS3 = event.Records[0].s3;
-
-  const bucketName = eventoS3.bucket.name;
-  const keyBucket = decodeURIComponent(eventoS3.object.key.replace(/\+/g, ' '));
-
-  const data = await obtemDadosDoCsv(bucketName, keyBucket);
-
-  console.log(data);
+module.exports = {
+  obtemDadosDoCsv,
+  fazUploadNoBucket,
 };
