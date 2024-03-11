@@ -14,7 +14,7 @@ provider:
             - s3:GetObject
           Resoure:
             - arn:aws:s3:::alunos-csv/*
-            
+
 functions:
   cadastrarAlunos:
     handler: cadastro_batch/aws/index.cadastrarAlunos
@@ -24,12 +24,15 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - suffix: .csv
+
   simulandoUploadCsv:
     handler: cadastro_batch/local/index.simulandoUploadCsv
     events:
       - httpApi:
           path: /alunos/batch
           method: post
+    enabled: false
+
   cadastrarAlunosLocal:
     handler: cadastro_batch/local/index.cadastrarAlunos
     events:
@@ -38,7 +41,9 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - suffix: .csv
+    enabled: false
 
 plugins:
   - serverless-offline
   - serverless-s3-local
+  - serverless-disable-functions
