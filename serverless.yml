@@ -3,6 +3,22 @@ app: sls-framework-2-lambda
 service: sls-framework-2-lambda
 frameworkVersion: '3'
 
+resources:
+  extensions:
+    S3BucketAlunoscsv:
+      Properties:
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - POST
+                - PUT
+                - GET
+                - HEAD
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+
 provider:
   name: aws
   runtime: nodejs18.x
