@@ -28,7 +28,7 @@ provider:
         - Effect: Allow
           Action:
             - s3:GetObject
-          Resoure:
+          Resource:
             - arn:aws:s3:::alunos-csv/*
 
 functions:
@@ -65,5 +65,5 @@ plugins:
   - serverless-disable-functions
 
 custom:
-serverless-offline:
-  httpPort: 3001
+  serverless-offline:
+    httpPort: 3001
