@@ -6,15 +6,31 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs18.x
-
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+          Resoure:
+            - arn:aws:s3:::alunos-csv/*
+            
 functions:
+  cadastrarAlunos:
+    handler: cadastro_batch/aws/index.cadastrarAlunos
+    events:
+      - s3:
+          bucket: alunos-csv
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .csv
   simulandoUploadCsv:
     handler: cadastro_batch/local/index.simulandoUploadCsv
     events:
       - httpApi:
           path: /alunos/batch
           method: post
-  cadastrarAlunos:
+  cadastrarAlunosLocal:
     handler: cadastro_batch/local/index.cadastrarAlunos
     events:
       - s3:
